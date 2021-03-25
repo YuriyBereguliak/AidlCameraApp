@@ -32,13 +32,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    override fun onResume() {
-        super.onResume()
-        super.bindService(
+    override fun onStart() {
+        super.onStart()
+        bindService(
             Intent(this, CameraInfoService::class.java),
             mServiceConnection,
             BIND_AUTO_CREATE
         )
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(mServiceConnection)
     }
     //endregion
 }
