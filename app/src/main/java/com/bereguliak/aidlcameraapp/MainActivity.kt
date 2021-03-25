@@ -26,12 +26,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val handler = Handler(mainLooper)
+    private lateinit var handler: Handler
 
     //region AppCompatActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        handler = Handler(mainLooper)
     }
 
     override fun onStart() {

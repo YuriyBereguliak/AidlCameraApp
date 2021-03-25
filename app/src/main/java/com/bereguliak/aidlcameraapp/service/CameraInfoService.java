@@ -27,6 +27,9 @@ public class CameraInfoService extends Service {
             Log.d("REMOTE", "SERVICE :: thread :: " + Thread.currentThread().getName());
 
             try {
+
+                Log.d("REMOTE", "JNI :: " + mCameraInfoHelper.stringFromJNI());
+
                 List<CameraData> data = new ArrayList<CameraData>() {{
                     add(new CameraData(1, "MainCamera"));
                     add(new CameraData(2, "PortraitCamera"));
@@ -42,12 +45,20 @@ public class CameraInfoService extends Service {
         }
 
         @Override
-        public CameraData loadMainCameraData() throws RemoteException {
+        public CameraData loadMainCameraData() {
             return new CameraData(1, "MainCamera");
         }
     };
 
+    private CameraInfoNativeHelper mCameraInfoHelper;
+
     //region Service
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mCameraInfoHelper = new CameraInfoNativeHelper();
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
