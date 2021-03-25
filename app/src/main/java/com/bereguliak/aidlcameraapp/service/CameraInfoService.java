@@ -7,7 +7,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.bereguliak.aidlcameraapp.CameraData;
 import com.bereguliak.aidlcameraapp.ICameraApi;
+import com.bereguliak.aidlcameraapp.ICameraInfoServiceResponseListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CameraInfoService extends Service {
     private final ICameraApi.Stub mBinder = new ICameraApi.Stub() {
@@ -17,8 +22,28 @@ public class CameraInfoService extends Service {
         }
 
         @Override
-        public void loadCameraData() throws RemoteException {
-            Log.d("CMP", "Async method :: load camera data");
+        public void loadCameraData(ICameraInfoServiceResponseListener listener) {
+            Log.d("REMOTE", "SERVICE :: load camera data");
+            Log.d("REMOTE", "SERVICE :: thread :: " + Thread.currentThread().getName());
+
+            try {
+                List<CameraData> data = new ArrayList<CameraData>() {{
+                    add(new CameraData(1, "MainCamera"));
+                    add(new CameraData(2, "PortraitCamera"));
+                    add(new CameraData(3, "FrontCamera"));
+                }};
+
+                Log.d("REMOTE", "SERVICE :: " + data);
+
+                listener.onResponse(data);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public CameraData loadMainCameraData() throws RemoteException {
+            return new CameraData(1, "MainCamera");
         }
     };
 

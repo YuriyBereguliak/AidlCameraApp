@@ -1,4 +1,4 @@
-package com.bereguliak.aidlcameraapp.data;
+package com.bereguliak.aidlcameraapp;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -49,6 +49,16 @@ public class CameraData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mId);
         dest.writeString(mName);
+    }
+    //endregion
+
+    //region Object
+    @Override
+    public String toString() {
+        return "CameraData{" +
+                "mId=" + mId +
+                ", mName='" + mName + '\'' +
+                '}';
     }
     //endregion
 }

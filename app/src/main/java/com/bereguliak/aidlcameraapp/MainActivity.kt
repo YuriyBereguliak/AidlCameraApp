@@ -16,9 +16,8 @@ class MainActivity : AppCompatActivity() {
     private val mServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             cameraApi = ICameraApi.Stub.asInterface(service)
-            Log.d("UI", "SERVICE CONNECTED")
-            Log.d("UI", "SERVICE :: pid :: ${cameraApi?.pid}")
-            Log.d("UI", "SERVICE :: app pid :: ${Process.myPid()}")
+            loadServiceProcessInfo()
+            loadCameraData()
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
@@ -44,6 +43,23 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         unbindService(mServiceConnection)
+    }
+    //endregion
+
+    //region Utility API
+    private fun loadServiceProcessInfo() {
+        Log.d("UI", "SERVICE :: pid :: ${cameraApi?.pid}")
+        Log.d("UI", "SERVICE :: app pid :: ${Process.myPid()}")
+    }
+
+    private fun loadCameraData() {
+        Log.d("UI", "Sync :: camera method :: ${cameraApi?.loadMainCameraData()}")
+
+        cameraApi?.loadCameraData(object : ICameraInfoServiceResponseListener.Stub() {
+            override fun onResponse(cameras: MutableList<CameraData>?) {
+                Log.d("UI", "Async :: ${cameras?.toString()}")
+            }
+        })
     }
     //endregion
 }
