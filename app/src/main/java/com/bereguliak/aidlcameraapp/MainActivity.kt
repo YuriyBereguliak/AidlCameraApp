@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.os.Process
 import android.util.Log
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity() {
             cameraApi = null
         }
     }
+
+    private val handler = Handler(mainLooper)
 
     //region AppCompatActivity
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +60,10 @@ class MainActivity : AppCompatActivity() {
 
         cameraApi?.loadCameraData(object : ICameraInfoServiceResponseListener.Stub() {
             override fun onResponse(cameras: MutableList<CameraData>?) {
-                Log.d("UI", "Async :: ${cameras?.toString()}")
+                handler.post {
+                    Log.d("UI", "Async :: ${cameras?.toString()}")
+                    Log.d("UI", "Async :: ${Thread.currentThread().name}")
+                }
             }
         })
     }
