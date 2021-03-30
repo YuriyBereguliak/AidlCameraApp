@@ -57,11 +57,27 @@ static void initCam() {
                 int32_t width = entry.data.i32[y + 1];
                 int32_t height = entry.data.i32[y + 2];
 
-                LOGD("camProps: width=%d vs height=%d", width, height);
+                LOGD("w-h: width=%d - height=%d", width, height);
             }
         }
 
-        *metadataObj = nullptr;
+        /// Camera aperture
+        /// mm
+        ACameraMetadata_getConstEntry(metadataObj,
+                                      ACAMERA_LENS_INFO_AVAILABLE_APERTURES,
+                                      &entry);
+        for (int y = 0; y < entry.count; y += 1)
+            LOGD("APERTURES: %f", entry.data.f[y]);
+
+        /// ISO
+        ACameraMetadata_getConstEntry(metadataObj,
+                                      ACAMERA_SENSOR_INFO_SENSITIVITY_RANGE,
+                                      &entry);
+        for (int y = 0; y < entry.count; y += 2)
+            LOGD("iso: min %d  max %d", entry.data.i32[y + 0], entry.data.i32[y + 1]);
+
+
+        metadataObj = nullptr;
     }
 
     ACameraManager_deleteCameraIdList(cameraIds);
