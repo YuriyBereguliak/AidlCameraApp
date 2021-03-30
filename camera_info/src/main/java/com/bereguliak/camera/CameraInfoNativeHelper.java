@@ -1,4 +1,4 @@
-package com.bereguliak.aidlcameraapp.service;
+package com.bereguliak.camera;
 
 public class CameraInfoNativeHelper {
     static {
@@ -6,4 +6,6 @@ public class CameraInfoNativeHelper {
     }
 
     public native String stringFromJNI();
+
+    public native String getCamerasInfo();
 }

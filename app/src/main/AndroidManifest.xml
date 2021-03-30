@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bereguliak.aidlcameraapp">
 
+    <uses-feature android:name="android.hardware.camera2.full" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -10,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AidlCameraApp">
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,8 +22,8 @@
         </activity>
 
         <service
-            android:name=".service.CameraInfoService"
-            android:process=":camera_info_process"
-            android:enabled="true"/>
+            android:name="com.bereguliak.camera.CameraInfoService"
+            android:enabled="true"
+            android:process=":camera_info_process" />
     </application>
 </manifest>

@@ -1,4 +1,4 @@
 // CameraData.aidl
-package com.bereguliak.aidlcameraapp;
+package com.bereguliak.camera;
 
 parcelable CameraData;

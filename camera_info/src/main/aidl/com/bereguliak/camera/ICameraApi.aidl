@@ -1,9 +1,9 @@
 // ICameraApi.aidl
-package com.bereguliak.aidlcameraapp;
+package com.bereguliak.camera;
 
 // Declare any non-default types here with import statements
-import com.bereguliak.aidlcameraapp.ICameraInfoServiceResponseListener;
-import com.bereguliak.aidlcameraapp.CameraData;
+import com.bereguliak.camera.ICameraInfoServiceResponseListener;
+import com.bereguliak.camera.CameraData;
 
 interface ICameraApi {
     int getPid();
