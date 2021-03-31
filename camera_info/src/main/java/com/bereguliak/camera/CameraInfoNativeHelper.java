@@ -14,4 +14,6 @@ public class CameraInfoNativeHelper {
     public native String[] loadCameraIds();
 
     public native Resolution[] loadCameraResolutions(String cameraId);
+
+    public native Iso loadCameraIso(String cameraId);
 }

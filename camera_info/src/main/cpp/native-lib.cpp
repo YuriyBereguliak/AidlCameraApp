@@ -16,10 +16,16 @@
 
 #define TAG "camera_info"
 #define LOGD(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
 
 struct camera_resolution {
     int width;
     int height;
+};
+
+struct camera_iso {
+    int min;
+    int max;
 };
 
 ACameraManager *cameraManager = nullptr;
@@ -48,8 +54,6 @@ std::vector<std::string> getCamerasList() {
 }
 
 std::vector<camera_resolution> getCameraResolution(const char *cameraId) {
-    LOGD("camera id %s", cameraId);
-
     ///
     std::vector<camera_resolution> result;
 
@@ -79,12 +83,30 @@ std::vector<camera_resolution> getCameraResolution(const char *cameraId) {
 
             struct camera_resolution resolution = {width, height};
             result.push_back(resolution);
-
-            LOGD("w-h: width=%d - height=%d", resolution.width, resolution.height);
         }
     }
 
     return result;
+}
+
+camera_iso getCameraIso(const char *cameraId) {
+
+    ACameraMetadata *metadataObj;
+    ACameraManager_getCameraCharacteristics(cameraManager, cameraId, &metadataObj);
+
+    ACameraMetadata_const_entry entry = {0};
+
+
+    camera_status_t status = ACameraMetadata_getConstEntry(metadataObj,
+                                                           ACAMERA_SENSOR_INFO_SENSITIVITY_RANGE,
+                                                           &entry);
+    if (status != ACAMERA_OK) {
+        return {0, 0};
+    }
+
+    struct camera_iso iso = {entry.data.i32[0], entry.data.i32[1]};
+
+    return iso;
 }
 
 //https://developer.android.com/ndk/reference/group/camera#group___camera_1gga49cf3e5a3deefe079ad036a8fac14627ab4ef4fabbbaaecf6f2fc74eaa9197b26
@@ -92,11 +114,8 @@ void initCam() {
     ACameraIdList *cameraIds = nullptr;
     ACameraManager_getCameraIdList(cameraManager, &cameraIds);
 
-    LOGD("Init CAM");
-    LOGD("Number of cameras :: %d", cameraIds->numCameras);
-
     if (cameraIds->numCameras < 1) {
-        LOGD("No camera device detected");
+        LOGE("No camera device detected");
         return;
     }
 
@@ -116,13 +135,6 @@ void initCam() {
                                       &entry);
         for (int y = 0; y < entry.count; y += 1)
             LOGD("APERTURES: %f", entry.data.f[y]);
-
-        /// ISO
-        ACameraMetadata_getConstEntry(metadataObj,
-                                      ACAMERA_SENSOR_INFO_SENSITIVITY_RANGE,
-                                      &entry);
-        for (int y = 0; y < entry.count; y += 2)
-            LOGD("iso: min %d  max %d", entry.data.i32[y + 0], entry.data.i32[y + 1]);
 
     }
 
@@ -186,12 +198,12 @@ Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraResolutions(
     std::vector<camera_resolution> resolutions = getCameraResolution(convertedString);
 
     // Class
-    jclass employeeClass = env->FindClass("com/bereguliak/camera/Resolution");
+    jclass resolutionClass = env->FindClass("com/bereguliak/camera/Resolution");
     // get a reference to the constructor
-    jmethodID constructor = env->GetMethodID(employeeClass, "<init>", "(II)V");
+    jmethodID constructor = env->GetMethodID(resolutionClass, "<init>", "(II)V");
 
     jobjectArray result;
-    result = (jobjectArray) env->NewObjectArray(resolutions.size(), employeeClass, nullptr);
+    result = (jobjectArray) env->NewObjectArray(resolutions.size(), resolutionClass, nullptr);
 
     for (int i = 0; i < resolutions.size(); i++) {
         // Args
@@ -200,10 +212,25 @@ Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraResolutions(
         args[0].i = resolutions[i].width;
         args[1].i = resolutions[i].height;
         // create
-        jobject resolutionObject = env->NewObjectA(employeeClass, constructor, args);
+        jobject resolutionObject = env->NewObjectA(resolutionClass, constructor, args);
         env->SetObjectArrayElement(result, i, resolutionObject);
     }
 
     return result;
+}
+
+JNIEXPORT jobject
+JNICALL
+Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraIso(
+        JNIEnv *env,
+        jobject,
+        jstring cameraId) {
+    const char *convertedString = env->GetStringUTFChars(cameraId, nullptr);
+    camera_iso iso = getCameraIso(convertedString);
+
+    jclass isoClass = env->FindClass("com/bereguliak/camera/Iso");
+    jmethodID constructor = env->GetMethodID(isoClass, "<init>", "(II)V");
+    jobject isoObject = env->NewObject(isoClass, constructor, iso.min, iso.max);
+    return isoObject;
 }
 }

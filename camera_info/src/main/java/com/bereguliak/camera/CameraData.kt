@@ -7,8 +7,12 @@ import kotlinx.android.parcel.Parcelize
 data class CameraData(
     val id: Int,
     val name: String,
-    val resolutions: List<Resolution>
+    val resolutions: List<Resolution>,
+    val iso: Iso?
 ) : Parcelable
 
 @Parcelize
 data class Resolution(val width: Int, val height: Int) : Parcelable
+
+@Parcelize
+data class Iso(val min: Int, val max: Int) : Parcelable
