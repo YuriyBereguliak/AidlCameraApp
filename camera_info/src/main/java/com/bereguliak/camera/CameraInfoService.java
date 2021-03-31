@@ -8,7 +8,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 public class CameraInfoService extends Service {
@@ -28,10 +28,13 @@ public class CameraInfoService extends Service {
                 String[] cameras = mCameraInfoHelper.loadCameraIds();
 
                 for (String id : cameras) {
+
+                    Resolution[] resolutions = mCameraInfoHelper.loadCameraResolutions(id);
+
                     result.add(new CameraData(
                             Integer.parseInt(id),
                             id,
-                            Collections.emptyList()));
+                            Arrays.asList(resolutions)));
                 }
 
                 listener.onResponse(result);

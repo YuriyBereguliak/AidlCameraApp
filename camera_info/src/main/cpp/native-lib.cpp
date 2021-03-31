@@ -17,6 +17,11 @@
 #define TAG "camera_info"
 #define LOGD(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
 
+struct camera_resolution {
+    int width;
+    int height;
+};
+
 ACameraManager *cameraManager = nullptr;
 
 void initCameraManager() {
@@ -42,6 +47,46 @@ std::vector<std::string> getCamerasList() {
     return result;
 }
 
+std::vector<camera_resolution> getCameraResolution(const char *cameraId) {
+    LOGD("camera id %s", cameraId);
+
+    ///
+    std::vector<camera_resolution> result;
+
+    ///
+    ACameraMetadata *metadataObj;
+    ACameraManager_getCameraCharacteristics(cameraManager, cameraId, &metadataObj);
+
+    ACameraMetadata_const_entry entry = {0};
+
+    /// ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+    /// The available stream configurations that this camera device supports
+    /// The configurations are listed as (format, width, height, input?) tuples.
+    ACameraMetadata_getConstEntry(metadataObj,
+                                  ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,
+                                  &entry);
+
+    for (int y = 0; y < entry.count; y += 4) {
+        int32_t input = entry.data.i32[y + 3];
+        if (input) continue;
+
+        int32_t format = entry.data.i32[y + 0];
+        /// enum
+        /// This format is always supported as an output format for the android Camera2 NDK API.
+        if (format == AIMAGE_FORMAT_JPEG) {
+            int32_t width = entry.data.i32[y + 1];
+            int32_t height = entry.data.i32[y + 2];
+
+            struct camera_resolution resolution = {width, height};
+            result.push_back(resolution);
+
+            LOGD("w-h: width=%d - height=%d", resolution.width, resolution.height);
+        }
+    }
+
+    return result;
+}
+
 //https://developer.android.com/ndk/reference/group/camera#group___camera_1gga49cf3e5a3deefe079ad036a8fac14627ab4ef4fabbbaaecf6f2fc74eaa9197b26
 void initCam() {
     ACameraIdList *cameraIds = nullptr;
@@ -63,27 +108,6 @@ void initCam() {
         ACameraManager_getCameraCharacteristics(cameraManager, id, &metadataObj);
 
         ACameraMetadata_const_entry entry = {0};
-
-        /// ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS
-        /// The available stream configurations that this camera device supports
-        /// The configurations are listed as (format, width, height, input?) tuples.
-        ACameraMetadata_getConstEntry(metadataObj,
-                                      ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS,
-                                      &entry);
-        for (int y = 0; y < entry.count; y += 4) {
-            int32_t input = entry.data.i32[y + 3];
-            if (input) continue;
-
-            int32_t format = entry.data.i32[y + 0];
-            /// enum
-            /// This format is always supported as an output format for the android Camera2 NDK API.
-            if (format == AIMAGE_FORMAT_JPEG) {
-                int32_t width = entry.data.i32[y + 1];
-                int32_t height = entry.data.i32[y + 2];
-
-                LOGD("w-h: width=%d - height=%d", width, height);
-            }
-        }
 
         /// Camera aperture
         /// mm
@@ -148,6 +172,38 @@ Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraIds(
     for (int i = 0; i < cameras.size(); i++) {
         env->SetObjectArrayElement(result, i, env->NewStringUTF(cameras[i].c_str()));
     }
+    return result;
+}
+
+JNIEXPORT jobjectArray
+JNICALL
+Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraResolutions(
+        JNIEnv *env,
+        jobject,
+        jstring cameraId) {
+    // get resolutions
+    const char *convertedString = env->GetStringUTFChars(cameraId, nullptr);
+    std::vector<camera_resolution> resolutions = getCameraResolution(convertedString);
+
+    // Class
+    jclass employeeClass = env->FindClass("com/bereguliak/camera/Resolution");
+    // get a reference to the constructor
+    jmethodID constructor = env->GetMethodID(employeeClass, "<init>", "(II)V");
+
+    jobjectArray result;
+    result = (jobjectArray) env->NewObjectArray(resolutions.size(), employeeClass, nullptr);
+
+    for (int i = 0; i < resolutions.size(); i++) {
+        // Args
+        jvalue args[2];
+        // define arguments
+        args[0].i = resolutions[i].width;
+        args[1].i = resolutions[i].height;
+        // create
+        jobject resolutionObject = env->NewObjectA(employeeClass, constructor, args);
+        env->SetObjectArrayElement(result, i, resolutionObject);
+    }
+
     return result;
 }
 }

@@ -12,4 +12,6 @@ public class CameraInfoNativeHelper {
     public native void deInitCameraManager();
 
     public native String[] loadCameraIds();
+
+    public native Resolution[] loadCameraResolutions(String cameraId);
 }
