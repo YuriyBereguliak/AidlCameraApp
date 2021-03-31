@@ -8,6 +8,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class CameraInfoService extends Service {
     private final ICameraApi.Stub mBinder = new ICameraApi.Stub() {
@@ -20,30 +22,19 @@ public class CameraInfoService extends Service {
         @Override
         public void loadCameraData(ICameraInfoServiceResponseListener listener) {
             try {
-                listener.onResponse(new ArrayList<CameraData>() {{
-                    add(new CameraData(1,
-                            "MainCamera",
-                            new ArrayList<Resolution>() {{
-                                add(new Resolution(1920, 1080));
-                                add(new Resolution(1280, 720));
-                                add(new Resolution(960, 576));
-                            }}
-                    ));
-                    add(new CameraData(2,
-                            "PortraitCamera",
-                            new ArrayList<Resolution>() {{
-                                add(new Resolution(1920, 1080));
-                                add(new Resolution(1280, 720));
-                                add(new Resolution(960, 576));
-                            }}
-                    ));
-                    add(new CameraData(3,
-                            "FrontCamera",
-                            new ArrayList<Resolution>() {{
-                                add(new Resolution(1280, 720));
-                            }}
-                    ));
-                }});
+
+                List<CameraData> result = new ArrayList<>();
+
+                String[] cameras = mCameraInfoHelper.loadCameraIds();
+
+                for (String id : cameras) {
+                    result.add(new CameraData(
+                            Integer.parseInt(id),
+                            id,
+                            Collections.emptyList()));
+                }
+
+                listener.onResponse(result);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -67,6 +58,13 @@ public class CameraInfoService extends Service {
     public void onCreate() {
         super.onCreate();
         mCameraInfoHelper = new CameraInfoNativeHelper();
+        mCameraInfoHelper.initCameraManager();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mCameraInfoHelper.deInitCameraManager();
     }
 
     @Override

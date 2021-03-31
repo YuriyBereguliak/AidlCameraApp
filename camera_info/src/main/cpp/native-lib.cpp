@@ -17,9 +17,33 @@
 #define TAG "camera_info"
 #define LOGD(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
 
+ACameraManager *cameraManager = nullptr;
+
+void initCameraManager() {
+    cameraManager = ACameraManager_create();
+}
+
+void deInitCameraManager() {
+    ACameraManager_delete(cameraManager);
+}
+
+std::vector<std::string> getCamerasList() {
+    ACameraIdList *cameraIds = nullptr;
+    ACameraManager_getCameraIdList(cameraManager, &cameraIds);
+
+    std::vector<std::string> result;
+    for (int i = 0; i < cameraIds->numCameras; ++i) {
+        const char *id = cameraIds->cameraIds[i];
+        LOGD("id %s", id);
+        result.emplace_back(id);
+    }
+    ACameraManager_deleteCameraIdList(cameraIds);
+
+    return result;
+}
+
 //https://developer.android.com/ndk/reference/group/camera#group___camera_1gga49cf3e5a3deefe079ad036a8fac14627ab4ef4fabbbaaecf6f2fc74eaa9197b26
-static void initCam() {
-    ACameraManager *cameraManager = ACameraManager_create();
+void initCam() {
     ACameraIdList *cameraIds = nullptr;
     ACameraManager_getCameraIdList(cameraManager, &cameraIds);
 
@@ -76,12 +100,9 @@ static void initCam() {
         for (int y = 0; y < entry.count; y += 2)
             LOGD("iso: min %d  max %d", entry.data.i32[y + 0], entry.data.i32[y + 1]);
 
-
-        metadataObj = nullptr;
     }
 
     ACameraManager_deleteCameraIdList(cameraIds);
-    ACameraManager_delete(cameraManager);
 }
 
 //
@@ -93,17 +114,40 @@ JNICALL
 Java_com_bereguliak_camera_CameraInfoNativeHelper_stringFromJNI(
         JNIEnv *env,
         jobject) {
-    initCam();
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
 }
 
-JNIEXPORT jstring
+JNIEXPORT void
 JNICALL
-Java_com_bereguliak_camera_CameraInfoNativeHelper_cameraInfo(
+Java_com_bereguliak_camera_CameraInfoNativeHelper_initCameraManager(
         JNIEnv *env,
         jobject) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
+    initCameraManager();
+}
+
+JNIEXPORT void
+JNICALL
+Java_com_bereguliak_camera_CameraInfoNativeHelper_deInitCameraManager(
+        JNIEnv *env,
+        jobject) {
+    deInitCameraManager();
+}
+
+JNIEXPORT jobjectArray
+JNICALL
+Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraIds(
+        JNIEnv *env,
+        jobject) {
+    std::vector<std::string> cameras = getCamerasList();
+
+    jobjectArray result;
+    result = (jobjectArray) env->NewObjectArray(cameras.size(),
+                                                env->FindClass("java/lang/String"),
+                                                env->NewStringUTF(""));
+    for (int i = 0; i < cameras.size(); i++) {
+        env->SetObjectArrayElement(result, i, env->NewStringUTF(cameras[i].c_str()));
+    }
+    return result;
 }
 }
