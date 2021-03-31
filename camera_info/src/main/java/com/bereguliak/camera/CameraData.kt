@@ -8,7 +8,8 @@ data class CameraData(
     val id: Int,
     val name: String,
     val resolutions: List<Resolution>,
-    val iso: Iso
+    val iso: Iso,
+    val aperture: Float
 ) : Parcelable
 
 @Parcelize

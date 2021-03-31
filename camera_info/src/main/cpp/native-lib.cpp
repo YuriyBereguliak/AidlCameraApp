@@ -96,7 +96,6 @@ camera_iso getCameraIso(const char *cameraId) {
 
     ACameraMetadata_const_entry entry = {0};
 
-
     camera_status_t status = ACameraMetadata_getConstEntry(metadataObj,
                                                            ACAMERA_SENSOR_INFO_SENSITIVITY_RANGE,
                                                            &entry);
@@ -109,36 +108,16 @@ camera_iso getCameraIso(const char *cameraId) {
     return iso;
 }
 
-//https://developer.android.com/ndk/reference/group/camera#group___camera_1gga49cf3e5a3deefe079ad036a8fac14627ab4ef4fabbbaaecf6f2fc74eaa9197b26
-void initCam() {
-    ACameraIdList *cameraIds = nullptr;
-    ACameraManager_getCameraIdList(cameraManager, &cameraIds);
+float getCameraAperture(const char *cameraId){
+    ACameraMetadata *metadataObj;
+    ACameraManager_getCameraCharacteristics(cameraManager, cameraId, &metadataObj);
 
-    if (cameraIds->numCameras < 1) {
-        LOGE("No camera device detected");
-        return;
-    }
+    ACameraMetadata_const_entry entry = {0};
 
-    for (int i = 0; i < cameraIds->numCameras; ++i) {
-        const char *id = cameraIds->cameraIds[i];
-        LOGD("camera id %s", id);
-
-        ACameraMetadata *metadataObj;
-        ACameraManager_getCameraCharacteristics(cameraManager, id, &metadataObj);
-
-        ACameraMetadata_const_entry entry = {0};
-
-        /// Camera aperture
-        /// mm
-        ACameraMetadata_getConstEntry(metadataObj,
-                                      ACAMERA_LENS_INFO_AVAILABLE_APERTURES,
-                                      &entry);
-        for (int y = 0; y < entry.count; y += 1)
-            LOGD("APERTURES: %f", entry.data.f[y]);
-
-    }
-
-    ACameraManager_deleteCameraIdList(cameraIds);
+    ACameraMetadata_getConstEntry(metadataObj,
+                                  ACAMERA_LENS_INFO_AVAILABLE_APERTURES,
+                                  &entry);
+    return entry.data.f[0];
 }
 
 //
@@ -232,5 +211,15 @@ Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraIso(
     jmethodID constructor = env->GetMethodID(isoClass, "<init>", "(II)V");
     jobject isoObject = env->NewObject(isoClass, constructor, iso.min, iso.max);
     return isoObject;
+}
+
+JNIEXPORT jfloat
+JNICALL
+Java_com_bereguliak_camera_CameraInfoNativeHelper_loadCameraAperture(
+        JNIEnv *env,
+        jobject,
+        jstring cameraId) {
+    const char *convertedString = env->GetStringUTFChars(cameraId, nullptr);
+    return getCameraAperture(convertedString);
 }
 }

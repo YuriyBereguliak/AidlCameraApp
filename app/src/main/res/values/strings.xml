@@ -5,4 +5,5 @@
 
     <string name="text_item_camera_info_title">Camera %s</string>
     <string name="text_item_camera_info_iso">%d-%d</string>
+    <string name="text_item_camera_info_aperture">f/%.2f</string>
 </resources>

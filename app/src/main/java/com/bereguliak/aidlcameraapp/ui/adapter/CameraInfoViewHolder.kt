@@ -28,6 +28,11 @@ class CameraInfoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             data.iso.max
         )
 
+        apertureTextView.text = itemView.context.getString(
+            R.string.text_item_camera_info_aperture,
+            data.aperture,
+        )
+
         // Only for test
         val resolutionBuilder = StringBuilder()
         data.resolutions.forEachIndexed { index, resolution ->

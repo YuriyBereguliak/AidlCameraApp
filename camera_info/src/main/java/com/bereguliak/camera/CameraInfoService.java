@@ -31,12 +31,14 @@ public class CameraInfoService extends Service {
 
                     Resolution[] resolutions = mCameraInfoHelper.loadCameraResolutions(id);
                     Iso iso = mCameraInfoHelper.loadCameraIso(id);
+                    float aperture = mCameraInfoHelper.loadCameraAperture(id);
 
                     result.add(new CameraData(
                             Integer.parseInt(id),
                             id,
                             Arrays.asList(resolutions),
-                            iso));
+                            iso,
+                            aperture));
                 }
 
                 listener.onResponse(result);
@@ -53,7 +55,8 @@ public class CameraInfoService extends Service {
                         add(new Resolution(1280, 720));
                         add(new Resolution(960, 576));
                     }},
-                    new Iso(100, 1000));
+                    new Iso(100, 1000),
+                    1.5f);
         }
     };
 
