@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/margin_all_default">
+
+    <TextView
+        android:id="@+id/text_view_item_camera_info_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="@dimen/textsize_all_subheading"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Camera 1" />
+
+    <TextView
+        android:id="@+id/text_view_item_camera_iso"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/margin_all_medium"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_all_medium"
+        app:drawableLeftCompat="@drawable/ic_iso"
+        app:drawableStartCompat="@drawable/ic_iso"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_camera_info_name"
+        tools:text="100 - 1000" />
+
+    <TextView
+        android:id="@+id/text_view_item_camera_aperture"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/margin_all_medium"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_all_medium"
+        app:drawableLeftCompat="@drawable/ic_aperture"
+        app:drawableStartCompat="@drawable/ic_aperture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_camera_iso"
+        tools:text="2.8" />
+
+    <TextView
+        android:id="@+id/text_view_item_camera_resolutions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/margin_all_medium"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/margin_all_medium"
+        android:paddingBottom="@dimen/margin_all_medium"
+        android:background="#F2F1EF"
+        app:drawableLeftCompat="@drawable/ic_resolution"
+        app:drawableStartCompat="@drawable/ic_resolution"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_camera_aperture"
+        tools:text="2.8" />
+</androidx.constraintlayout.widget.ConstraintLayout>
